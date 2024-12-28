@@ -16,6 +16,11 @@ type question struct {
 	Source       string `json:"source"`
 }
 
+type comment struct {
+	CommentID   string `json:"commentid"`
+	CommentText string `json:"commentText"`
+}
+
 var questions = []question{
 	{QuestionID: "1",
 		QuestionText: "The genealogy of Jesus Christ in the Gospel of Matthew begins with Adam.",
@@ -48,12 +53,30 @@ var questions = []question{
 	},
 }
 
+var comments = []comment{}
+
 func getQuestions(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, questions)
+}
+
+func createComment(c *gin.Context) {
+	var newComment comment
+	if err := c.BindJSON(&newComment); err != nil {
+		return
+	}
+
+	comments = append(comments, newComment)
+	c.IndentedJSON(http.StatusCreated, newComment)
+}
+
+func getComments(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, comments)
 }
 
 func main() {
 	router := gin.Default()
 	router.GET("/questions", getQuestions)
+	router.GET("/comments", getComments)
+	router.POST("/comment", createComment)
 	router.Run("localhost:8080")
 }
