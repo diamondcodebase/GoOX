@@ -3,12 +3,21 @@ package main
 import (
 	"net/http"
 
+	"context"
+	"fmt"
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	//"errors"
 )
 
 type question struct {
-	QuestionID   string `json:"questionid"`
+	QuestionID   string `json:"questionId"`
 	QuestionType string `json:"questionType"`
 	QuestionText string `json:"questionText"`
 	Answer       bool   `json:"answer"`
@@ -73,7 +82,48 @@ func getComments(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, comments)
 }
 
+func Connect() *mongo.Collection {
+	// Find .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %s", err)
+	}
+
+	// Get value from .env
+	MONGO_URI := os.Getenv("MONGO_URI")
+
+	// Connect to the database.
+	clientOption := options.Client().ApplyURI(MONGO_URI)
+	client, err := mongo.Connect(context.Background(), clientOption)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the connection.
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create collection
+	collection := client.Database("testdb").Collection("test")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to db")
+
+	return collection
+}
+
+func dbconnect_test() {
+
+}
+
+const uri = "mongodb://localhost:27017/test"
+
 func main() {
+	Connect()
 	router := gin.Default()
 	router.GET("/questions", getQuestions)
 	router.GET("/comments", getComments)
