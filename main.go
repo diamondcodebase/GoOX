@@ -1,16 +1,12 @@
 package main
 
 import (
-	"net/http"
-
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,7 +22,7 @@ type question struct {
 	Source       string `json:"source"`
 }
 
-type comment struct {
+type Comment struct {
 	CommentID   string `json:"commentid"`
 	CommentText string `json:"commentText"`
 }
@@ -63,14 +59,14 @@ var questions = []question{
 	},
 }
 
-var comments = []comment{}
+var comments = []Comment{}
 
 func getQuestions(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, questions)
 }
 
 func createComment(c *gin.Context) {
-	var newComment comment
+	var newComment Comment
 	if err := c.BindJSON(&newComment); err != nil {
 		return
 	}
@@ -83,70 +79,95 @@ func getComments(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, comments)
 }
 
-func Connect() *mongo.Collection {
-	// Find .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
-	}
+// func getQueryComment(c *gin.Context) {
+// 	// convert bson.M to Struct
+// 	var queryComment comment
+// 	var m = c.IndentedJSON(http.StatusOK, comments)
+// }
 
-	// Get value from .env
-	MONGO_URI := os.Getenv("MONGO_URI")
-
-	// Connect to the database.
-	clientOption := options.Client().ApplyURI(MONGO_URI)
-	client, err := mongo.Connect(context.Background(), clientOption)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Check the connection.
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create collection
-	collection := client.Database("testdb").Collection("test")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Connected to db")
-
-	return collection
-}
-
-const uri = "mongodb://localhost:27017/test"
-
-func dbconnect_test() {
-	// Use the SetServerAPIOptions() method to set the Stable API version to 1
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
-	// Create a new client and connect to the server
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		panic(err)
-	}
+// This function closes mongoDB connection and cancel context
+func close(client *mongo.Client, ctx context.Context, cancel context.CancelFunc) {
+	defer cancel()
 	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
+		if err := client.Disconnect(ctx); err != nil {
 			panic(err)
 		}
 	}()
-
-	// Send a ping to confirm a successful connection
-	var result bson.M
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
-		panic(err)
-	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 }
 
+func connect(uri string) (*mongo.Client, context.Context,
+	context.CancelFunc, error) {
+	ctx, cancel := context.WithTimeout(context.Background(),
+		30*time.Second)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	return client, ctx, cancel, err
+}
+
+// query method returns a cursor and error.
+func query(client *mongo.Client, ctx context.Context,
+	dataBase, col string, query, field interface{}) (result *mongo.Cursor, err error) {
+
+	// select database and collection.
+	collection := client.Database(dataBase).Collection(col)
+
+	// collection has an method Find,
+	// that returns a mongo.cursor
+	// based on query and field.
+	result, err = collection.Find(ctx, query, options.Find().SetProjection(field))
+	return
+}
+
+// get method for endpoint
+func getData() (comments []bson.D) {
+	// Get Client, Context, CancelFunc and err from connect method.
+	client, ctx, cancel, err := connect("mongodb://localhost:27017")
+	if err != nil {
+		panic(err)
+	}
+
+	// Free the resource when main function is returned
+	defer close(client, ctx, cancel)
+
+	// create a filter an option of type interface,
+	// that stores bjson objects.
+	var filter, option interface{}
+
+	// filter  gets all document,
+	// with maths field greater that 70
+	filter = bson.D{{"commentid", "22749003"}}
+
+	//  option remove id field from all documents
+	option = bson.D{{"_id", 0}}
+
+	// call the query method with client, context, database name, collection  name, filter and option
+	cursor, err := query(client, ctx, "local",
+		"comments", filter, option)
+	// handle the errors.
+	if err != nil {
+		panic(err)
+	}
+
+	var results []bson.D
+
+	if err := cursor.All(ctx, &results); err != nil {
+		// handle the error
+		panic(err)
+	}
+
+	// printing the result of query.
+	fmt.Println("Query Result")
+	for _, doc := range results {
+		fmt.Println(doc)
+	}
+	return results
+}
+
+// main function
 func main() {
-	dbconnect_test()
-	router := gin.Default()
-	router.GET("/questions", getQuestions)
-	router.GET("/comments", getComments)
-	router.POST("/comment", createComment)
-	router.Run("localhost:8080")
+	getData()
+	// router := gin.Default()
+	// router.GET("/questions", getQuestions)
+	// router.GET("/comments", getComments)
+	// router.POST("/comment", createComment)
+	// router.Run("localhost:8080")
 }
