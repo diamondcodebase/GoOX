@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -226,6 +227,14 @@ func getQuestionByQuestionID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, questions)
 }
 
+// Function of generating a series of random numbers
+func generateRandomNos(round int) {
+	for i := 0; i < round; i++ {
+		randomNumber := rand.Intn(5)
+		fmt.Println(randomNumber)
+	}
+}
+
 // query method returns a cursor and error.
 func query(client *mongo.Client, ctx context.Context,
 	dataBase, col string, query, field interface{}) (result *mongo.Cursor, err error) {
@@ -245,6 +254,8 @@ func main() {
 	// Create a new Gin router
 	router := gin.Default()
 
+	// Test random number function
+	generateRandomNos(20)
 	// Define the route to retrieve all records
 	router.GET("/comments", getAllComments)
 	router.GET("/comment", getCommentByCommentID)    // test by cmd: curl localhost:8080/comment?id=22749003
