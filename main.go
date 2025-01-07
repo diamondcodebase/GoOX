@@ -235,6 +235,14 @@ func generateRandomNos(round int) {
 	}
 }
 
+// Functio of generating an array of random numbers with 5 distinct integers
+func generateQuestionNoArray(round int, maxNo int) []int {
+	arr := rand.Perm(maxNo)
+	sl := arr[:round]
+	fmt.Println("slice equals to ", sl)
+	return sl
+}
+
 // query method returns a cursor and error.
 func query(client *mongo.Client, ctx context.Context,
 	dataBase, col string, query, field interface{}) (result *mongo.Cursor, err error) {
@@ -255,7 +263,10 @@ func main() {
 	router := gin.Default()
 
 	// Test random number function
-	generateRandomNos(20)
+	// generateRandomNos(20)
+	// Test generate random array function
+	generateQuestionNoArray(5, 200)
+
 	// Define the route to retrieve all records
 	router.GET("/comments", getAllComments)
 	router.GET("/comment", getCommentByCommentID)    // test by cmd: curl localhost:8080/comment?id=22749003
