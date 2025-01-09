@@ -8,12 +8,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	//"errors"
 )
+
+// need to execute "go get github.com/gin-contrib/cors" to overcome the cross origin block from frontend call API
 
 type Question struct {
 	QuestionID   int32  `json:"questionId"`
@@ -314,7 +317,13 @@ func query(client *mongo.Client, ctx context.Context,
 func main() {
 	// Create a new Gin router
 	router := gin.Default()
-
+	// Apply middleware to overcome CORS policy during API call from frontend
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
 	// Test random number function
 	// generateRandomNos(20)
 	// Test generate random array function
