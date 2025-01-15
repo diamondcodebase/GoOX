@@ -231,7 +231,7 @@ func getQuestionByQuestionID(c *gin.Context) {
 }
 
 // Function of finding multiple questions according to question ids
-func getQuestionsByQuestionIDs(c *gin.Context) {
+func getBibleQuestionSet(c *gin.Context) {
 	// Get length integer from query parameter len
 	lengthStr := c.Query("len")
 	length, err := strconv.Atoi(lengthStr)
@@ -241,7 +241,7 @@ func getQuestionsByQuestionIDs(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "questions")
+	client, collection, err := getMongoDBConnection("local", "bible_questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -333,7 +333,7 @@ func main() {
 	router.GET("/comments", getAllComments)
 	router.GET("/comment", getCommentByCommentID)         // test by cmd: curl localhost:8080/comment?id=22749003
 	router.GET("/question", getQuestionByQuestionID)      // test by cmd: curl localhost:8080/question?id=12
-	router.GET("/questionset", getQuestionsByQuestionIDs) // test by cmd: curl localhost:8080/questionset?len=5
+	router.GET("/questionset/bible", getBibleQuestionSet) // test by cmd: curl localhost:8080/questionset/bible?len=5
 	// Run the router
 	router.Run("localhost:8080")
 }
