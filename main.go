@@ -283,6 +283,59 @@ func getBibleQuestionSet(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, questions)
 }
 
+// Function of finding multiple questions according to question ids
+func getCanadaQuestionSet(c *gin.Context) {
+	// Get length integer from query parameter len
+	lengthStr := c.Query("len")
+	length, err := strconv.Atoi(lengthStr)
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	// Get the MongoDB client and collection
+	client, collection, err := getMongoDBConnection("local", "canada_questions")
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	defer client.Disconnect(context.Background())
+
+	// Get question collection size
+	collectionSize, err := collection.CountDocuments(context.Background(), bson.D{})
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	// Generate a ramdom questionIds array
+	questionIds := generateQuestionNoArray(length, int(collectionSize))
+	fmt.Println("questionIds are ", questionIds)
+
+	// Create the filter using $in operator
+	filter := bson.M{"questionId": bson.M{"$in": questionIds}}
+
+	// Retrieve an array of questions from MongoDB according to the random questionIds array
+	cursor, err := collection.Find(context.Background(), filter)
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var questions []Question
+	for cursor.Next(context.Background()) {
+		var question Question
+		if err := cursor.Decode(&question); err != nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			fmt.Printf(err.Error())
+			return
+		}
+		questions = append(questions, question)
+	}
+	c.IndentedJSON(http.StatusOK, questions)
+}
+
 // Function of generating a series of random numbers
 func generateRandomNos(round int) {
 	for i := 0; i < round; i++ {
@@ -331,9 +384,10 @@ func main() {
 
 	// Define the route to retrieve all records
 	router.GET("/comments", getAllComments)
-	router.GET("/comment", getCommentByCommentID)         // test by cmd: curl localhost:8080/comment?id=22749003
-	router.GET("/question", getQuestionByQuestionID)      // test by cmd: curl localhost:8080/question?id=12
-	router.GET("/questionset/bible", getBibleQuestionSet) // test by cmd: curl localhost:8080/questionset/bible?len=5
+	router.GET("/comment", getCommentByCommentID)           // test by cmd: curl localhost:8080/comment?id=22749003
+	router.GET("/question", getQuestionByQuestionID)        // test by cmd: curl localhost:8080/question?id=12
+	router.GET("/questionset/bible", getBibleQuestionSet)   // test by cmd: curl localhost:8080/questionset/bible?len=5
+	router.GET("/questionset/canada", getCanadaQuestionSet) // test by cmd: curl localhost:8080/questionset/canada?len=5
 	// Run the router
 	router.Run("localhost:8080")
 }
