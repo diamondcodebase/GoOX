@@ -400,6 +400,12 @@ func generateRandomNos(round int) {
 // Functio of generating an array of random numbers with 5 distinct integers
 func generateQuestionNoArray(round int, maxNo int) []int {
 	arr := rand.Perm(maxNo)
+
+	// every integers in the array add 1 to avoid zero value id
+	for i := range arr {
+		arr[i]++
+	}
+
 	sl := arr[:round]
 	fmt.Println("slice equals to ", sl)
 	return sl
