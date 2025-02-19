@@ -69,10 +69,35 @@ var questions = []Question{
 	},
 }
 
+var testResult = []Question{
+	{
+		QuestionID:   1,
+		QuestionText: "The first question.",
+		Answer:       false,
+		AnswerDetail: "The first answer detail",
+	},
+	{
+		QuestionID:   2,
+		QuestionText: "The second question.",
+		Answer:       true,
+		AnswerDetail: "The second answer detail",
+	},
+	{
+		QuestionID:   3,
+		QuestionText: "The third question.",
+		Answer:       false,
+		AnswerDetail: "The third answer detail",
+	},
+}
+
 var comments = []Comment{}
 
 func getQuestions(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, questions)
+}
+
+func getTestResult(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, testResult)
 }
 
 func createComment(c *gin.Context) {
@@ -129,7 +154,7 @@ func getMongoDBConnection(dbname string, collectname string) (*mongo.Client, *mo
 // Function of getting all comments
 func getAllComments(c *gin.Context) {
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "comments")
+	client, collection, err := getMongoDBConnection("ox", "comments")
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -164,7 +189,7 @@ func getCommentByCommentID(c *gin.Context) {
 	commentid := c.Query("id")
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "comments")
+	client, collection, err := getMongoDBConnection("ox", "comments")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -202,7 +227,7 @@ func getQuestionByQuestionID(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "questions")
+	client, collection, err := getMongoDBConnection("ox", "questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -241,7 +266,7 @@ func getBibleQuestionSet(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "bible_questions")
+	client, collection, err := getMongoDBConnection("ox", "bible_questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -294,7 +319,7 @@ func getCanadaQuestionSet(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "canada_questions")
+	client, collection, err := getMongoDBConnection("ox", "canada_questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -347,7 +372,7 @@ func getHongKongQuestionSet(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("local", "hongkong_questions")
+	client, collection, err := getMongoDBConnection("ox", "hongkong_questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -444,6 +469,7 @@ func main() {
 	// Define the route to retrieve all records
 	router.GET("/comments", getAllComments)
 	router.GET("/comment", getCommentByCommentID)               // test by cmd: curl localhost:8080/comment?id=22749003
+	router.GET("/test", getTestResult)                          // test by cmd: curl localhost:8080/test
 	router.GET("/question", getQuestionByQuestionID)            // test by cmd: curl localhost:8080/question?id=12
 	router.GET("/questionset/bible", getBibleQuestionSet)       // test by cmd: curl localhost:8080/questionset/bible?len=5
 	router.GET("/questionset/canada", getCanadaQuestionSet)     // test by cmd: curl localhost:8080/questionset/canada?len=5
