@@ -227,7 +227,7 @@ func getQuestionByQuestionID(c *gin.Context) {
 	}
 
 	// Get the MongoDB client and collection
-	client, collection, err := getMongoDBConnection("ox", "questions")
+	client, collection, err := getMongoDBConnection("ox", "bible_questions")
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
