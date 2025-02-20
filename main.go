@@ -474,6 +474,8 @@ func main() {
 	router.GET("/questionset/bible", getBibleQuestionSet)       // test by cmd: curl localhost:8080/questionset/bible?len=5
 	router.GET("/questionset/canada", getCanadaQuestionSet)     // test by cmd: curl localhost:8080/questionset/canada?len=5
 	router.GET("/questionset/hongkong", getHongKongQuestionSet) // test by cmd: curl localhost:8080/questionset/hongkong?len=5
-	// Run the router
-	router.Run("localhost:8081")
+	// Run the server on localhost
+	// router.Run("localhost:8080")
+	// Run the server on a domain
+	router.Run(":8080")
 }
