@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -17,6 +19,26 @@ import (
 )
 
 // need to execute "go get github.com/gin-contrib/cors" to overcome the cross origin block from frontend call API
+
+// for config
+type Config struct {
+	Backend struct {
+		Port string `json:"port"`
+	}
+}
+
+func LoadConfiguration(filename string) (Config, error) {
+	var config Config
+	configFile, err := os.Open(filename)
+	defer configFile.Close()
+
+	if err != nil {
+		return config, err
+	}
+	jsonParser := json.NewDecoder(configFile)
+	err = jsonParser.Decode(&config)
+	return config, err
+}
 
 type Question struct {
 	QuestionID   int32  `json:"questionId"`
@@ -452,6 +474,11 @@ func query(client *mongo.Client, ctx context.Context,
 
 // main function
 func main() {
+	// Test to load config file
+	config, _ := LoadConfiguration("config.json")
+	var port = ":" + config.Backend.Port
+	fmt.Println(port)
+
 	// Create a new Gin router
 	router := gin.Default()
 	// Apply middleware to overcome CORS policy during API call from frontend
@@ -477,5 +504,5 @@ func main() {
 	// Run the server on localhost
 	// router.Run("localhost:8080")
 	// Run the server on a domain
-	router.Run(":8080")
+	router.Run(port)
 }
