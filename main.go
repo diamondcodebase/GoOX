@@ -483,9 +483,10 @@ func main() {
 	router := gin.Default()
 	// Apply middleware to overcome CORS policy during API call from frontend
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://main.d2q5e0gpmjipai.amplifyapp.com"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://main.d2q5e0gpmjipai.amplifyapp.com", "https://main.d2q5e0gpmjipai.amplifyapp.com:3000"},
 		AllowMethods:     []string{"GET"},
 		AllowHeaders:     []string{"Content-Type"},
+		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
 	// Test random number function
