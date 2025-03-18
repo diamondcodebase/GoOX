@@ -475,9 +475,9 @@ func query(client *mongo.Client, ctx context.Context,
 // main function
 func main() {
 	// Test to load config file
-	config, _ := LoadConfiguration("config.json")
-	var port = ":" + config.Backend.Port
-	fmt.Println(port)
+	// config, _ := LoadConfiguration("config.json")
+	// var port = ":" + config.Backend.Port
+	// fmt.Println(port)
 
 	// Create a new Gin router
 	router := gin.Default()
@@ -504,6 +504,16 @@ func main() {
 	router.GET("/questionset/hongkong", getHongKongQuestionSet) // test by cmd: curl localhost:8080/questionset/hongkong?len=5
 	// Run the server on localhost
 	// router.Run("localhost:8080")
+
+	// Azure App Service sets the port as an Environmental
+	// This can be random, so needs to be loaed at start
+	port := os.Getenv("HTTP_PLATFORM_PORT")
+
+	// default back to 8080 for local dev
+	if port == "" {
+		port = "8080"
+	}
+
 	// Run the server on a domain
-	router.Run(port)
+	router.Run("localhost:" + port)
 }
