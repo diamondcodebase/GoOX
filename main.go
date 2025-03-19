@@ -516,4 +516,6 @@ func main() {
 
 	// Run the server on a domain
 	router.Run("localhost:" + port)
+
+	// trigger deployment
 }
