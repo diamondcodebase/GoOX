@@ -160,7 +160,7 @@ func close(client *mongo.Client, ctx context.Context, cancel context.CancelFunc)
 // Function of getting client and collection according to url, dbname and collection name
 func getMongoDBConnection(dbname string, collectname string) (*mongo.Client, *mongo.Collection, error) {
 	// connect mongoDB
-	var url = "mongodb://ec2-54-183-37-47.us-west-1.compute.amazonaws.com:27017/"
+	var url = "mongodb://localhost:27017/"
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(url))
 	if err != nil {
