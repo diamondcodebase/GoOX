@@ -569,5 +569,5 @@ func main() {
 	port := "8080"
 
 	// Run the server on a domain
-	router.Run("localhost:" + port)
+	router.Run(":" + port)
 }
