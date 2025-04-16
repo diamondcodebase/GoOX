@@ -492,7 +492,7 @@ func main() {
 	// Test random number function
 	// generateRandomNos(20)
 	// Test generate random array function
-	generateQuestionNoArray(5, 200)
+	// generateQuestionNoArray(5, 200)
 
 	// Define the route to retrieve all records
 	router.GET("/comments", getAllComments)
@@ -507,12 +507,14 @@ func main() {
 
 	// Azure App Service sets the port as an Environmental
 	// This can be random, so needs to be loaed at start
-	port := os.Getenv("HTTP_PLATFORM_PORT")
+	// port := os.Getenv("HTTP_PLATFORM_PORT")
 
-	// default back to 8080 for local dev
-	if port == "" {
-		port = "8080"
-	}
+	// // default back to 8080 for local dev
+	// if port == "" {
+	// 	port = "8080"
+	// }
+
+	port := "8080"
 
 	// Run the server on a domain
 	router.Run("localhost:" + port)
