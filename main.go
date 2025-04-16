@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"strings"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -472,6 +474,52 @@ func query(client *mongo.Client, ctx context.Context,
 	return
 }
 
+// allow CORS function
+// CORS middleware function definition
+func corsMiddleware() gin.HandlerFunc {
+	// Define allowed origins as a comma-separated string
+	originsString := "https://diamondbackend.click,http://localhost"
+	var allowedOrigins []string
+	if originsString != "" {
+		// Split the originsString into individual origins and store them in allowedOrigins slice
+		allowedOrigins = strings.Split(originsString, ",")
+	}
+
+	// Return the actual middleware handler function
+	return func(c *gin.Context) {
+		// Function to check if a given origin is allowed
+		isOriginAllowed := func(origin string, allowedOrigins []string) bool {
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == allowedOrigin {
+					return true
+				}
+			}
+			return false
+		}
+
+		// Get the Origin header from the request
+		origin := c.Request.Header.Get("Origin")
+
+		// Check if the origin is allowed
+		if isOriginAllowed(origin, allowedOrigins) {
+			// If the origin is allowed, set CORS headers in the response
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		}
+
+		// Handle preflight OPTIONS requests by aborting with status 204
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		// Call the next handler
+		c.Next()
+	}
+}
+
 // main function
 func main() {
 	// Test to load config file
@@ -481,11 +529,15 @@ func main() {
 
 	// Create a new Gin router
 	router := gin.Default()
+
+	// Use the CORS middleware defined
+	router.Use(corsMiddleware())
+
 	// Apply middleware to overcome CORS policy during API call from frontend
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://main.d2q5e0gpmjipai.amplifyapp.com", "https://main.d2q5e0gpmjipai.amplifyapp.com:3000", "https://diamondbackend.click"},
+		AllowOrigins:     []string{"http://localhost:3000/", "https://diamondbackend.click/"},
 		AllowMethods:     []string{"GET"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
