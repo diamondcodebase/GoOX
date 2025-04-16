@@ -531,7 +531,7 @@ func main() {
 	router := gin.Default()
 
 	// Use the CORS middleware defined
-	router.Use(corsMiddleware())
+	// router.Use(corsMiddleware())
 
 	// Apply middleware to overcome CORS policy during API call from frontend
 	router.Use(cors.New(cors.Config{
