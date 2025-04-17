@@ -536,9 +536,9 @@ func main() {
 	// Apply middleware to overcome CORS policy during API call from frontend
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "https://diamondbackend.click"},
-		AllowMethods:     []string{"GET"},
-		AllowHeaders:     []string{"Content-Type"},
-		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Link"},
 		AllowCredentials: true,
 	}))
 	// Test random number function
