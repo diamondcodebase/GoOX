@@ -547,13 +547,13 @@ func main() {
 	// generateQuestionNoArray(5, 200)
 
 	// Define the route to retrieve all records
-	router.GET("/comments", getAllComments)
-	router.GET("/comment", getCommentByCommentID)               // test by cmd: curl localhost:8080/comment?id=22749003
-	router.GET("/test", getTestResult)                          // test by cmd: curl localhost:8080/test
-	router.GET("/question", getQuestionByQuestionID)            // test by cmd: curl localhost:8080/question?id=12
-	router.GET("/questionset/bible", getBibleQuestionSet)       // test by cmd: curl localhost:8080/questionset/bible?len=5
-	router.GET("/questionset/canada", getCanadaQuestionSet)     // test by cmd: curl localhost:8080/questionset/canada?len=5
-	router.GET("/questionset/hongkong", getHongKongQuestionSet) // test by cmd: curl localhost:8080/questionset/hongkong?len=5
+	router.GET("/api/comments", getAllComments)
+	router.GET("/api/comment", getCommentByCommentID)               // test by cmd: curl localhost:8080/comment?id=22749003
+	router.GET("/api/test", getTestResult)                          // test by cmd: curl localhost:8080/test
+	router.GET("/api/question", getQuestionByQuestionID)            // test by cmd: curl localhost:8080/question?id=12
+	router.GET("/api/questionset/bible", getBibleQuestionSet)       // test by cmd: curl localhost:8080/questionset/bible?len=5
+	router.GET("/api/questionset/canada", getCanadaQuestionSet)     // test by cmd: curl localhost:8080/questionset/canada?len=5
+	router.GET("/api/questionset/hongkong", getHongKongQuestionSet) // test by cmd: curl localhost:8080/questionset/hongkong?len=5
 	// Run the server on localhost
 	// router.Run("localhost:8080")
 
